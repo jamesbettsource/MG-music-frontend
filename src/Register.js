@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function Register() {
   const [email, setEmail] = useState("");
@@ -16,9 +16,11 @@ function Register() {
     setMessage("");
 
     try {
-      const res = await fetch(`${API_URL}/register`, {
+      const res = await fetch(`${API_URL}/api/register`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({ email, password })
       });
 
@@ -27,10 +29,11 @@ function Register() {
       if (!res.ok) {
         setMessage(data.error || "Registration failed");
       } else {
-        setMessage("Account created successfully. Redirecting to login...");
-        setTimeout(() => navigate("/"), 1500);
+        setMessage("Account created. Redirecting to login...");
+        setTimeout(() => navigate("/"), 1200);
       }
-    } catch {
+
+    } catch (err) {
       setMessage("Server error. Try again.");
     }
 
@@ -38,37 +41,33 @@ function Register() {
   };
 
   return (
-    <div style={{ maxWidth: "400px", margin: "80px auto", textAlign: "center" }}>
+    <div style={{ maxWidth: 400, margin: "80px auto" }}>
       <h2>Register</h2>
-
       {message && <p>{message}</p>}
 
-      <form onSubmit={handleRegister} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+      <form onSubmit={handleRegister}>
         <input
           type="email"
           placeholder="Email"
           required
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={e => setEmail(e.target.value)}
         />
-
+        <br /><br />
         <input
           type="password"
           placeholder="Password"
           required
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={e => setPassword(e.target.value)}
         />
-
-        <button type="submit" disabled={loading}>
+        <br /><br />
+        <button disabled={loading}>
           {loading ? "Creating..." : "Register"}
         </button>
       </form>
-
-      <p style={{ marginTop: "15px" }}>
-        Already have an account? <Link to="/">Login</Link>
-      </p>
     </div>
   );
 }
 
 export default Register;
+
 
