@@ -112,3 +112,7 @@ const styles = {
 };
 
 export default Login;
+<p style={{ marginTop: "15px" }}>
+  Don’t have an account? <a href="/register">Register</a>
+</p>
+
