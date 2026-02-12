@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Login({ onLogin }) {
   const [email, setEmail] = useState("");
@@ -7,6 +7,7 @@ function Login({ onLogin }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const navigate = useNavigate();
   const API_URL = "https://mg-music1.onrender.com";
 
   const handleSubmit = async (e) => {
@@ -30,9 +31,10 @@ function Login({ onLogin }) {
       }
 
       localStorage.setItem("token", data.access_token);
-      if (onLogin) onLogin();
+      onLogin?.();
+      navigate("/songs");
 
-    } catch (err) {
+    } catch {
       setError("Server unreachable. Try again.");
     }
 
@@ -69,10 +71,8 @@ function Login({ onLogin }) {
         </button>
       </form>
 
-      {/* ✅ REGISTER LINK */}
       <p style={{ marginTop: "15px" }}>
-        Don’t have an account?{" "}
-        <Link to="/register">Register</Link>
+        Don’t have an account? <Link to="/register">Register</Link>
       </p>
     </div>
   );
@@ -88,11 +88,7 @@ const styles = {
     textAlign: "center"
   },
   title: { marginBottom: "20px" },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "15px"
-  },
+  form: { display: "flex", flexDirection: "column", gap: "15px" },
   input: {
     padding: "10px",
     fontSize: "16px",
@@ -108,12 +104,10 @@ const styles = {
     backgroundColor: "#111",
     color: "#fff"
   },
-  error: {
-    color: "red",
-    marginBottom: "10px"
-  }
+  error: { color: "red", marginBottom: "10px" }
 };
 
 export default Login;
+
 
 
