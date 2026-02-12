@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 function Login({ onLogin }) {
   const [email, setEmail] = useState("");
@@ -16,9 +17,7 @@ function Login({ onLogin }) {
     try {
       const res = await fetch(`${API_URL}/api/login`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
       });
 
@@ -31,7 +30,7 @@ function Login({ onLogin }) {
       }
 
       localStorage.setItem("token", data.access_token);
-      onLogin();
+      if (onLogin) onLogin();
 
     } catch (err) {
       setError("Server unreachable. Try again.");
@@ -69,6 +68,12 @@ function Login({ onLogin }) {
           {loading ? "Logging in..." : "Login"}
         </button>
       </form>
+
+      {/* ✅ REGISTER LINK */}
+      <p style={{ marginTop: "15px" }}>
+        Don’t have an account?{" "}
+        <Link to="/register">Register</Link>
+      </p>
     </div>
   );
 }
@@ -82,9 +87,7 @@ const styles = {
     boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
     textAlign: "center"
   },
-  title: {
-    marginBottom: "20px"
-  },
+  title: { marginBottom: "20px" },
   form: {
     display: "flex",
     flexDirection: "column",
@@ -112,7 +115,5 @@ const styles = {
 };
 
 export default Login;
-<p style={{ marginTop: "15px" }}>
-  Don’t have an account? <a href="/register">Register</a>
-</p>
+
 
