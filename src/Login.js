@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 function Login({ onLogin }) {
   const [email, setEmail] = useState("");
@@ -7,7 +7,6 @@ function Login({ onLogin }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate();
   const API_URL = "https://mg-music1.onrender.com";
 
   const handleSubmit = async (e) => {
@@ -18,7 +17,9 @@ function Login({ onLogin }) {
     try {
       const res = await fetch(`${API_URL}/api/login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({ email, password })
       });
 
@@ -31,10 +32,9 @@ function Login({ onLogin }) {
       }
 
       localStorage.setItem("token", data.access_token);
-      onLogin?.();
-      navigate("/songs");
+      onLogin();
 
-    } catch {
+    } catch (err) {
       setError("Server unreachable. Try again.");
     }
 
@@ -71,8 +71,12 @@ function Login({ onLogin }) {
         </button>
       </form>
 
+      {/* ✅ FIXED REGISTER LINK */}
       <p style={{ marginTop: "15px" }}>
-        Don’t have an account? <Link to="/register">Register</Link>
+        Don’t have an account?{" "}
+        <Link to="/register" style={{ color: "#111", fontWeight: "bold" }}>
+          Register
+        </Link>
       </p>
     </div>
   );
@@ -87,8 +91,14 @@ const styles = {
     boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
     textAlign: "center"
   },
-  title: { marginBottom: "20px" },
-  form: { display: "flex", flexDirection: "column", gap: "15px" },
+  title: {
+    marginBottom: "20px"
+  },
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "15px"
+  },
   input: {
     padding: "10px",
     fontSize: "16px",
@@ -104,7 +114,10 @@ const styles = {
     backgroundColor: "#111",
     color: "#fff"
   },
-  error: { color: "red", marginBottom: "10px" }
+  error: {
+    color: "red",
+    marginBottom: "10px"
+  }
 };
 
 export default Login;
