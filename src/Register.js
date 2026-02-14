@@ -1,69 +1,90 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 function Register() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
+  const navigate = useNavigate();
+
+  const [form, setForm] = useState({
+    email: "",
+    password: ""
+  });
+
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate();
-  const API_URL = "https://mg-music1.onrender.com";
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value
+    });
+  };
 
-  const handleRegister = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
     setLoading(true);
-    setMessage("");
 
     try {
-      const res = await fetch(`${API_URL}/api/register`, {
+      const res = await fetch("/api/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify(form)
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setMessage(data.error || "Registration failed");
-      } else {
-        setMessage("Account created. Redirecting to login...");
-        setTimeout(() => navigate("/"), 1200);
+        setError(data.error || "Registration failed");
+        setLoading(false);
+        return;
       }
 
+      // success → go to login
+      navigate("/");
     } catch (err) {
-      setMessage("Server error. Try again.");
+      setError("Server error");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: "80px auto" }}>
+    <div style={{ padding: 40 }}>
       <h2>Register</h2>
-      {message && <p>{message}</p>}
 
-      <form onSubmit={handleRegister}>
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
+      <form onSubmit={handleSubmit}>
         <input
           type="email"
+          name="email"
           placeholder="Email"
+          value={form.email}
+          onChange={handleChange}
           required
-          onChange={e => setEmail(e.target.value)}
         />
         <br /><br />
+
         <input
           type="password"
+          name="password"
           placeholder="Password"
+          value={form.password}
+          onChange={handleChange}
           required
-          onChange={e => setPassword(e.target.value)}
         />
         <br /><br />
-        <button disabled={loading}>
-          {loading ? "Creating..." : "Register"}
+
+        <button type="submit" disabled={loading}>
+          {loading ? "Registering..." : "Register"}
         </button>
       </form>
+
+      <p style={{ marginTop: 20 }}>
+        Already have an account? <Link to="/">Login</Link>
+      </p>
     </div>
   );
 }
