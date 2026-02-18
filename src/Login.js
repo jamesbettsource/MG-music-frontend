@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 
-function Login({ onLogin }) {
+function Login({ onLogin, goRegister }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -14,16 +13,21 @@ function Login({ onLogin }) {
     setError("");
     setLoading(true);
 
+    console.log("LOGIN CLICKED");
+
     try {
       const res = await fetch(`${API_URL}/api/login`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password }),
       });
 
+      console.log("LOGIN RESPONSE:", res.status);
+
       const data = await res.json();
+      console.log("LOGIN DATA:", data);
 
       if (!res.ok) {
         setError(data.error || "Login failed");
@@ -32,95 +36,54 @@ function Login({ onLogin }) {
       }
 
       localStorage.setItem("token", data.access_token);
-      onLogin();
+      console.log("TOKEN SAVED");
+
+      setLoading(false);
+      onLogin(); // 🔥 MUST FIRE
 
     } catch (err) {
-      setError("Server unreachable. Try again.");
+      console.error("LOGIN ERROR:", err);
+      setError("Server error");
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.title}>Login</h2>
+    <div>
+      <h2>Login</h2>
 
-      {error && <p style={styles.error}>{error}</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
 
-      <form onSubmit={handleSubmit} style={styles.form}>
+      <form onSubmit={handleSubmit}>
         <input
           type="email"
           placeholder="Email"
           value={email}
-          onChange={e => setEmail(e.target.value)}
+          onChange={(e) => setEmail(e.target.value)}
           required
-          style={styles.input}
         />
 
         <input
           type="password"
           placeholder="Password"
           value={password}
-          onChange={e => setPassword(e.target.value)}
+          onChange={(e) => setPassword(e.target.value)}
           required
-          style={styles.input}
         />
 
-        <button type="submit" disabled={loading} style={styles.button}>
+        <button type="submit" disabled={loading}>
           {loading ? "Logging in..." : "Login"}
         </button>
       </form>
 
-      {/* ✅ FIXED REGISTER LINK */}
-      <p style={{ marginTop: "15px" }}>
-        Don’t have an account?{" "}
-        <Link to="/register" style={{ color: "#111", fontWeight: "bold" }}>
+      <p>
+        No account?{" "}
+        <button type="button" onClick={goRegister}>
           Register
-        </Link>
+        </button>
       </p>
     </div>
   );
 }
 
-const styles = {
-  container: {
-    maxWidth: "400px",
-    margin: "80px auto",
-    padding: "30px",
-    borderRadius: "10px",
-    boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
-    textAlign: "center"
-  },
-  title: {
-    marginBottom: "20px"
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "15px"
-  },
-  input: {
-    padding: "10px",
-    fontSize: "16px",
-    borderRadius: "6px",
-    border: "1px solid #ccc"
-  },
-  button: {
-    padding: "12px",
-    fontSize: "16px",
-    borderRadius: "6px",
-    border: "none",
-    cursor: "pointer",
-    backgroundColor: "#111",
-    color: "#fff"
-  },
-  error: {
-    color: "red",
-    marginBottom: "10px"
-  }
-};
-
 export default Login;
-
-
-

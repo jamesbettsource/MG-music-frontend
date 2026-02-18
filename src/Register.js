@@ -1,94 +1,77 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
 
-function Register() {
-  const navigate = useNavigate();
-
-  const [form, setForm] = useState({
-    email: "",
-    password: ""
-  });
-
-  const [error, setError] = useState("");
+function Register({ goLogin }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value
-    });
-  };
+  const API_URL = "https://mg-music1.onrender.com";
 
-  const handleSubmit = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    setError("");
+    setMessage("");
     setLoading(true);
 
     try {
-      const res = await fetch("/api/register", {
+      const res = await fetch(`${API_URL}/api/register`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(form)
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Registration failed");
+        setMessage(data.error || "Registration failed");
         setLoading(false);
         return;
       }
 
-      // success → go to login
-      navigate("/");
+      setMessage("Registered successfully. You can now login.");
+      setLoading(false);
     } catch (err) {
-      setError("Server error");
-    } finally {
+      setMessage("Server error");
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ padding: 40 }}>
+    <div>
       <h2>Register</h2>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {message && <p>{message}</p>}
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleRegister}>
         <input
           type="email"
-          name="email"
           placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
           required
+          onChange={(e) => setEmail(e.target.value)}
         />
-        <br /><br />
 
         <input
           type="password"
-          name="password"
           placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
           required
+          onChange={(e) => setPassword(e.target.value)}
         />
-        <br /><br />
 
         <button type="submit" disabled={loading}>
-          {loading ? "Registering..." : "Register"}
+          {loading ? "Creating..." : "Register"}
         </button>
       </form>
 
-      <p style={{ marginTop: 20 }}>
-        Already have an account? <Link to="/">Login</Link>
+      <p>
+        Already have an account?{" "}
+        <button type="button" onClick={goLogin}>
+          Login
+        </button>
       </p>
     </div>
   );
 }
 
 export default Register;
-
-

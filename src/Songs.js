@@ -1,28 +1,36 @@
 import { useState } from "react";
 
-function Songs() {
-  const API_URL = "https://mg-music1.onrender.com";
-
+function Songs({ onLogout }) {
   const [genre, setGenre] = useState("");
   const [songs, setSongs] = useState([]);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const API_URL = "https://mg-music1.onrender.com";
 
   const fetchSongs = async () => {
+    console.log("FETCH SONGS CLICKED");
+
+    setError("");
+    setSongs([]);
+    setLoading(true);
+
     const token = localStorage.getItem("token");
 
     if (!token) {
-      setError("You must login first.");
+      setError("Missing auth token. Please login again.");
+      setLoading(false);
       return;
     }
 
-    if (!genre.trim()) {
-      setError("Please enter a genre.");
+    if (!genre) {
+      setError("Please enter a genre");
+      setLoading(false);
       return;
     }
 
-    setError("");
-    setLoading(true);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
 
     try {
       const res = await fetch(`${API_URL}/api/songs`, {
@@ -31,50 +39,56 @@ function Songs() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ genre })
+        body: JSON.stringify({ genre }),
+        signal: controller.signal
       });
 
+      console.log("SONGS RESPONSE STATUS:", res.status);
+
       const data = await res.json();
+      console.log("SONGS DATA:", data);
 
       if (!res.ok) {
-        throw new Error(data.error || "Failed to fetch songs");
+        setError(data.error || "Failed to fetch songs");
+      } else {
+        setSongs(data.songs || []);
       }
 
-      setSongs(data.songs || []);
-
     } catch (err) {
-      setError(err.message);
+      if (err.name === "AbortError") {
+        setError("Request timed out. Try again.");
+      } else {
+        setError("Network error while fetching songs");
+      }
     } finally {
+      clearTimeout(timeout);
       setLoading(false);
+      console.log("FETCH SONGS DONE");
     }
   };
 
   return (
-    <div style={{ maxWidth: "500px", margin: "auto" }}>
+    <div>
       <h2>Generate Playlist</h2>
 
-      {error && (
-        <p style={{ color: "red" }}>
-          {error}
-        </p>
-      )}
+      <button onClick={onLogout}>Logout</button>
 
-      <input
-        placeholder="Enter genre (e.g. Afrobeat)"
-        value={genre}
-        onChange={e => setGenre(e.target.value)}
-        style={{ width: "100%", marginBottom: "10px" }}
-      />
+      <div style={{ marginTop: "20px" }}>
+        <input
+          type="text"
+          placeholder="Genre"
+          value={genre}
+          onChange={(e) => setGenre(e.target.value)}
+        />
 
-      <button
-        onClick={fetchSongs}
-        disabled={loading}
-        style={{ width: "100%" }}
-      >
-        {loading ? "Loading songs..." : "Get Songs"}
-      </button>
+        <button onClick={fetchSongs} disabled={loading}>
+          {loading ? "Loading..." : "Get Songs"}
+        </button>
+      </div>
 
-      <ul style={{ marginTop: "20px" }}>
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
+      <ul>
         {songs.map((song, i) => (
           <li key={i}>{song}</li>
         ))}
